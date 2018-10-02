@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--今日天气概况信息-->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentLeft="true"
+    android:layout_below="@id/weather_current"
+    android:layout_marginTop="5dp">
+    <!--android:background="#ffff0000"-->
+    <!--天气情况图-->
+    <ImageView
+        android:id="@+id/weather_img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:src="@drawable/biz_plugin_weather_qing"/>
+    <!--今日星期-->
+    <TextView
+        android:id="@+id/week_today"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="5dp"
+        android:layout_toRightOf="@id/weather_img"
+        android:singleLine="true"
+        android:text="今天 星期三"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"/>
+    <!--温度范围-->
+    <TextView
+        android:id="@+id/temperature"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/week_today"
+        android:layout_marginLeft="5dp"
+        android:layout_toRightOf="@id/weather_img"
+        android:singleLine="true"
+        android:text="-2℃~7℃"
+        android:textColor="@android:color/white"
+        android:textSize="30sp"/>
+    <!--天气状况-->
+    <TextView
+        android:id="@+id/climate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/temperature"
+        android:layout_marginLeft="5dp"
+        android:layout_toRightOf="@id/weather_img"
+        android:singleLine="true"
+        android:text="多云转晴"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"/>
+    <!--风力信息-->
+    <TextView
+        android:id="@+id/wind"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/climate"
+        android:layout_marginLeft="5dp"
+        android:layout_toRightOf="@id/weather_img"
+        android:singleLine="true"
+        android:text="微风"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"/>
+</RelativeLayout>

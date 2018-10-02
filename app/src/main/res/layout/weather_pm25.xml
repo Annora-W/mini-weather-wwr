@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--PM2.5整体信息块-分两层-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentRight="true"
+    android:layout_alignParentTop="true"
+    android:orientation="vertical">
+    <!--android:background="#ffff0000"-->
+
+    <!--PM2.5信息块第一层-->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12.0dip">
+        <!--android:padding="12dip"-->
+
+        <!--左侧两行文字-->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <!--PM2.5文字-->
+            <TextView
+                android:id="@+id/pm2_5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:text="PM2.5"
+                android:textColor="@android:color/white"
+                android:textSize="12.0sp"/>
+            <!--PM2.5数值-->
+            <TextView
+                android:id="@+id/pm_data"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:text="220"
+                android:textColor="@android:color/white"
+                android:textSize="30.0sp"/>
+        </LinearLayout>
+        <!--PM2.5图片-->
+        <ImageView
+            android:id="@+id/pm2_5_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5.0dip"
+            android:src="@drawable/biz_plugin_weather_0_50"
+            />
+    </LinearLayout>
+
+    <!--PM2.5信息块第二层-污染等级（重度污染）-->
+    <TextView
+        android:id="@+id/pm2_5_quality"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:singleLine="true"
+        android:text="重度污染"
+        android:textColor="@android:color/white"
+        android:textSize="20.0sp"/>
+</LinearLayout>

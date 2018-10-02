@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--红色条RelativeLayout-->
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/title"
+    android:layout_width="fill_parent"
+    android:layout_height="45.0dip"
+    android:background="#ffcd2626"
+    android:gravity="center_vertical">
+
+    <!--小房子图标，城市管理，点击弹出城市选择界面-->
+    <ImageView
+        android:id="@+id/title_city_manager"
+        android:layout_width="45.0dip"
+        android:layout_height="45.0dip"
+        android:src="@drawable/title_city"/>
+
+    <!--小房子图标右侧的竖线-->
+    <ImageView
+        android:id="@+id/city_seperator"
+        android:layout_width="1.0dip"
+        android:layout_height="40dip"
+        android:layput_marginTop="2.0dip"
+        android:layout_toRightOf="@id/title_city_manager"
+        android:background="#A71717"/>
+
+    <!--北京天气，注意-->
+    <TextView
+        android:id="@+id/title_city_name"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_toRightOf="@id/city_seperator"
+        android:gravity="center_vertical"
+        android:paddingLeft="5dip"
+        android:text="北京天气"
+        android:textColor="#ffffffff"
+        android:textSize="22.0sp"/>
+
+    <!--刷新图标-->
+    <ImageView
+        android:id="@+id/title_update_btn"
+        android:layout_width="45.0dip"
+        android:layout_height="45.0dip"
+        android:layout_alignParentRight="true"
+        android:layout_gravity="center"
+        android:src="@drawable/title_update"/>
+
+    <!--北京天气-->
+    <ImageView
+        android:id="@+id/title_share"
+        android:layout_width="45.0dip"
+        android:layout_height="45.0dip"
+        android:layout_toLeftOf="@id/title_update_btn"
+        android:src="@drawable/title_share"/>
+
+    <!--北京天气-->
+    <ImageView
+        android:id="@+id/title_location"
+        android:layout_width="45.0dip"
+        android:layout_height="45.0dip"
+        android:layout_toLeftOf="@id/title_share"
+        android:src="@drawable/base_action_bar_action_city"/>
+</RelativeLayout>

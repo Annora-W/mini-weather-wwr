@@ -3,66 +3,40 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!--红色条RelativeLayout-->
-    <RelativeLayout
+    <!--Title Bar：通过include的方式引入布局，并添加一个id方便以后用-->
+    <include
         android:id="@+id/title"
+        layout="@layout/title_bar"/>
+
+    <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="45.0dip"
-        android:background="#ffcd2626"
-        android:gravity="center_vertical">
+        android:layout_height="fill_parent"
+        android:layout_below="@id/title"
+        android:background="@drawable/biz_plugin_weather_shenzhen_bg"
+        android:orientation="vertical">
 
-        <!--小房子图标-->
-        <ImageView
-            android:id="@+id/title_city_manager"
-            android:layout_width="45.0dip"
-            android:layout_height="45.0dip"
-            android:src="@drawable/title_city"/>
-
-        <!--小房子图标右侧的竖线-->
-        <ImageView
-                android:id="@+id/city_seperator"
-                android:layout_width="1.0dip"
-                android:layout_height="40dip"
-                android:layput_marginTop="2.0dip"
-                android:layout_toRightOf="@id/title_city_manager"
-                android:background="#A71717"/>
-
-        <!--北京天气-->
-        <TextView
-            android:id="@+id/title_city_name"
+        <!--今日天气信息-->
+        <RelativeLayout
+            android:id="@+id/weather_today"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_toRightOf="@id/city_seperator"
-            android:gravity="center_vertical"
-            android:paddingLeft="5dip"
-            android:text="北京天气"
-            android:textColor="#ffffffff"
-            android:textSize="22.0sp"/>
+            android:layout_height="wrap_content"
+            android:padding="10.0dip">
+            <!--今日天气实时信息块(加id为了方便下面用，在另一个文件的id貌似用不了)-->
+            <include
+                android:id="@+id/weather_current"
+                layout="@layout/weather_cur"/>
+            <!--PM2.5整体信息块-分两层-->
+            <include layout="@layout/weather_pm25"/>
+            <!--今日天气概况信息-->
+            <include layout="@layout/weather_today"/>
 
-        <!--刷新图标-->
-        <ImageView
-            android:id="@+id/title_update_btn"
-            android:layout_width="45.0dip"
-            android:layout_height="45.0dip"
-            android:layout_alignParentRight="true"
-            android:layout_gravity="center"
-            android:src="@drawable/title_update"/>
+        </RelativeLayout>
 
-        <!--北京天气-->
-        <ImageView
-            android:id="@+id/title_share"
-            android:layout_width="45.0dip"
-            android:layout_height="45.0dip"
-            android:layout_toLeftOf="@id/title_update_btn"
-            android:src="@drawable/title_share"/>
+        <!--未来七天天气信息-->
 
-        <!--北京天气-->
-        <ImageView
-            android:id="@+id/title_location"
-            android:layout_width="45.0dip"
-            android:layout_height="45.0dip"
-            android:layout_toLeftOf="@id/title_share"
-            android:src="@drawable/base_action_bar_action_city"/>
-    </RelativeLayout>
+        <!--广告等其他信息-->
+
+
+    </LinearLayout>
 
 </RelativeLayout>
