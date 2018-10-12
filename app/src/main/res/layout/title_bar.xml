@@ -20,7 +20,7 @@
         android:id="@+id/city_seperator"
         android:layout_width="1.0dip"
         android:layout_height="40dip"
-        android:layput_marginTop="2.0dip"
+        android:layout_marginTop="2.0dip"
         android:layout_toRightOf="@id/title_city_manager"
         android:background="#A71717"/>
 

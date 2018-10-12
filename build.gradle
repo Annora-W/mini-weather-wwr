@@ -8,7 +8,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.1.4'
-        
+        classpath 'com.google.gms:google-services:4.0.1'//这行对谷歌服务库进行依赖
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -19,6 +19,9 @@ allprojects {
     repositories {
         google()
         jcenter()
+        mavenCentral ()
+        maven {url 'https://dl.bintray.com/jetbrains/anko'} //这是你需要加入的，这个是解决这个问题的关键地方，我就是添加这个maven后不再报上面的错误了
+        maven {url "https://maven.google.com"} //谷歌广告
     }
 }
 
