@@ -1,6 +1,7 @@
 package com.example.annora.weather;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.Image;
 import android.os.Bundle;
@@ -31,7 +32,8 @@ import cn.pku.edu.wwr.util.NetUtil;
 
 public class MainActivity extends Activity implements View.OnClickListener{ //项目中所有活动必须继承Activity或它的子类才能拥有活动的特性
 
-    private ImageView mUpdateBtn;//weather05
+    private ImageView mUpdateBtn;//刷新按钮---weather05
+    private ImageView mCitySelect;//左上方，选择城市按钮---weather08
 
     //文字控件、图片控件
     private TextView cityTv, timeTv, humidityTv, weekTv, pmDataTv,
@@ -60,6 +62,9 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
         mUpdateBtn = (ImageView) findViewById(R.id.title_update_btn);//weather05
         mUpdateBtn.setOnClickListener(this);//weather05
 
+        mCitySelect = (ImageView) findViewById(R.id.title_city_manager);// ---weather08
+        mCitySelect.setOnClickListener(this);// ---weather08
+
         if(NetUtil.getNetworkState((this))!=NetUtil.NETWORN_NONE)
         {
             Log.d("myWeather","网络OK");
@@ -69,18 +74,27 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
             Log.d("myWeather","网络挂了");
             Toast.makeText(MainActivity.this,"网络挂了！",Toast.LENGTH_LONG).show();
         }
+
         initView();//初始化控件内容 ---weather07
     }
 
     //为更新按钮添加单击事件 weather05
     @Override
     public void onClick(View view) {
+
+        //Weather08-2
+        if(view.getId()==R.id.title_city_manager){
+            Intent i = new Intent(this,SelectCity.class);//Intent调用另一个Activity
+            //startActivity(i);
+            startActivityForResult(i,1);
+        }
+
         //如果点击的按钮id是刷新按钮的id
         if(view.getId()==R.id.title_update_btn)
         {
             //从SharedPreferences中读取城市的id
             SharedPreferences sharedPreferences = getSharedPreferences("config",MODE_PRIVATE);
-            String cityCode = sharedPreferences.getString("main_city_code","101160101");//从SharedPreferences中读取城市的id，如果没有就默认为101010100
+            String cityCode = sharedPreferences.getString("main_city_code","101010100");//从SharedPreferences中读取城市的id，如果没有就默认为101010100，，101120510
             Log.d("myWeather",cityCode);
 
             //检测是否有网络，如果有就执行“获取网络数据”的函数
@@ -96,7 +110,7 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
         }
     }
 
-    //使用 获取网络数据 weather05
+    //使用 获取网络数据 ---weather05
     private void queryWeatherCode(String citycode)
     {
         final String address = "http://wthrcdn.etouch.cn/WeatherApi?citykey=" + citycode;//URL
@@ -234,11 +248,11 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
                             {
                                 eventType = xmlPullParser.next();
                                 todayWeather.setShidu(xmlPullParser.getText());
-                            }else if(xmlPullParser.getName().equals("pm25"))
+                            }else if(xmlPullParser.getName().equals("pm25"))//这个数据有时候没有！！！
                             {
                                 eventType = xmlPullParser.next();
                                 todayWeather.setPm25(xmlPullParser.getText());
-                            }else if(xmlPullParser.getName().equals("quality"))
+                            }else if(xmlPullParser.getName().equals("quality"))//这个数据有时候没有！！！
                             {
                                 eventType = xmlPullParser.next();
                                 todayWeather.setQuality(xmlPullParser.getText());
@@ -419,6 +433,22 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
             case "中雨":
                 weatherImg.setImageResource(R.drawable.biz_plugin_weather_zhongyu);
                 break;
+        }
+    }
+
+    //接收返回的数据 ---weather08-2
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        if(requestCode == 1 && resultCode == RESULT_OK){
+            String newCityCode = data.getStringExtra("cityCode");//这个cityCode是哪里定义的?---SelectCity.java里的i.putExtra
+            Log.d("myWeather","选择的城市代码为"+newCityCode);
+
+            if(NetUtil.getNetworkState(this)!=NetUtil.NETWORN_NONE){
+                Log.d("myWeather","网络OK");
+                queryWeatherCode(newCityCode);
+            }else {
+                Log.d("myWeather","网络挂了");
+                Toast.makeText(MainActivity.this,"网络挂了！",Toast.LENGTH_LONG).show();
+            }
         }
     }
 }

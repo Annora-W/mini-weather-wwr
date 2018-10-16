@@ -6,8 +6,11 @@
    <!--
     icon：指定项目的应用图标
     label：指定应用名称，这个@string/app_name是对资源的引用方式，意思是引用res/values/strings.xml里的app_name
-   android:networkSecurityConfig="@xml/network_security_config" -->
+   android:networkSecurityConfig="@xml/network_security_config"
+
+   android:name="cn.pku.edu.wwr.App.MyApplication,weather09注册Application-->
     <application
+        android:name="cn.pku.edu.wwr.App.MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -17,13 +20,18 @@
         android:usesCleartextTraffic="true"
         >
 
-    <!--这一段表示对MainActivity这个活动进行注册，intent-filter里的两句表示这个活动是项目的主活动，在手机上打开APP后最先启动的就是这个活动-->
-    <activity android:name=".MainActivity">
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
-    </activity>
+        <!--这一段表示对MainActivity这个活动进行注册，intent-filter里的两句表示这个活动是项目的主活动，在手机上打开APP后最先启动的就是这个活动-->
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!--对SelectCity这个活动进行注册,weather08-->
+        <activity android:name=".SelectCity">
+
+        </activity>
 
     </application>
 
