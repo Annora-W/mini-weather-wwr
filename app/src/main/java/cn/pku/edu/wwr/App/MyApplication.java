@@ -89,7 +89,7 @@ public class MyApplication extends Application{
         }).start();
     }
     private boolean prepareCityList(){
-        mCityList=mCityDB.getAllCity();
+        mCityList=mCityDB.getAllCity();//调用CityDB.java的方法
         int i=0;
         for(City city: mCityList){
             i++;

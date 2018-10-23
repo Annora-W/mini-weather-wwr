@@ -3,8 +3,8 @@ package cn.edu.pku.zhangqixun.bean;
 //---Weather09
 public class City {
     private String province;
-    private String city;
-    private String number;
+    private String city;//城市名称
+    private String number;//城市编号
     private String firstPY;
     private String allPY;
     private String allFirstPY;

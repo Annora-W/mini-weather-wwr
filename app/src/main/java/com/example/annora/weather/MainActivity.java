@@ -82,7 +82,7 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
     @Override
     public void onClick(View view) {
 
-        //Weather08-2
+        //如果点击的按钮id是城市管理按钮的id ---Weather08-2
         if(view.getId()==R.id.title_city_manager){
             Intent i = new Intent(this,SelectCity.class);//Intent调用另一个Activity
             //startActivity(i);
