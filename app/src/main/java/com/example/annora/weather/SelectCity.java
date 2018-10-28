@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -33,6 +34,8 @@ import cn.pku.edu.wwr.App.MyApplication;
 public class SelectCity extends Activity implements View.OnClickListener{
 
     private ImageView mBackBtn;//返回按钮
+    private String cityCode;//返回到城市编码
+    private TextView titleName;//顶部标题的文字控件
 
     /*ListView三种适配器的使用例子*/
     //level1
@@ -59,6 +62,45 @@ public class SelectCity extends Activity implements View.OnClickListener{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.select_city);
 
+        //更新ListView
+        updateListView();
+
+        //返回按钮
+        mBackBtn = (ImageView)findViewById(R.id.title_back);
+        mBackBtn.setOnClickListener(this);
+
+        Log.d("SelectCity","SelectCity->oncreate");
+
+        //更新顶部当前城市文字
+        InitView();
+    }
+
+    //返回按钮的单击事件
+    /*  setResult(int resultCode, Intent data)
+　　在意图跳转的目的地界面调用这个方法把Activity想要返回的数据返回到主Activity，
+    第一个参数：当Activity结束时resultCode将归还在onActivityResult()中，一般为RESULT_CANCELED , RESULT_OK该值默认为-1。
+    第二个参数：一个Intent对象，返回给主Activity的数据。在intent对象携带了要返回的数据，使用putExtra( )方法。
+    */
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            //点击返回按钮
+            case R.id.title_back:
+                Log.d("myWeather","click back");
+                Intent i=new Intent();//weather08-2
+                //i.putExtra("cityCode","101160101");
+                i.putExtra("cityCode",cityCode);//putExtra将计算的值回传回去；返回城市编号--weather08-2
+                setResult(RESULT_OK, i);//weather08-2
+                finish();//结束当前的activity的生命周期
+                break;
+            default:
+                break;
+        }
+    }
+
+    //用适配器更新ListView
+    void updateListView()
+    {
         /*ListView三种适配器的使用*/
         //--level1
         MyApplication mApplication = MyApplication.getInstance();
@@ -71,15 +113,17 @@ public class SelectCity extends Activity implements View.OnClickListener{
         }
         ListView mlistView=(ListView)findViewById(R.id.list_view);
         ArrayAdapter<String> adapter=new ArrayAdapter<String>(//适配器
-             SelectCity.this,
-             android.R.layout.simple_list_item_1,
+                SelectCity.this,
+                android.R.layout.simple_list_item_1,
                 viewList);//适配器
         mlistView.setAdapter(adapter);
         mlistView.setOnItemClickListener(new AdapterView.OnItemClickListener() {//单击ListView的响应事件
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 City city = cityList.get(position);
-                Toast.makeText(SelectCity.this,"你单击了"+position+"："+city.getCity()+"，编码为"+city.getNumber(),Toast.LENGTH_SHORT).show();
+                cityCode = city.getNumber();
+                updateTitleName(city.getCity());
+                Toast.makeText(SelectCity.this,"你单击了"+position+"："+ city.getCity() +"，编码为"+ cityCode,Toast.LENGTH_SHORT).show();
             }
         });
         //--level2
@@ -130,25 +174,19 @@ public class SelectCity extends Activity implements View.OnClickListener{
 //                CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER); //用来确定适配器行为的标志
 //        mlistView.setAdapter(myAdapter);
 //
-//        //返回按钮
-//        mBackBtn = (ImageView)findViewById(R.id.title_back);
-//        mBackBtn.setOnClickListener(this);
-//
-//        Log.d("SelectCity","SelectCity->oncreate");
     }
 
-    //返回按钮的单击事件
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()){
-            case R.id.title_back:
-                Intent i=new Intent();//weather08-2
-                i.putExtra("cityCode","101160101");//weather08-2
-                setResult(RESULT_OK, i);//weather08-2
-                finish();
-                break;
-            default:
-                break;
-        }
+    //初始化UI控件
+    void InitView(){
+        //将控件名与id关联
+        titleName=(TextView)findViewById(R.id.title_name);
+
+        //初始化控件内容
+        titleName.setText("当前城市：北京");
+    }
+
+    //更新顶部当前城市的文字
+    void updateTitleName(String cityName){
+        titleName.setText("当前城市：" + cityName);
     }
 }

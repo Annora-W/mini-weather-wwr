@@ -68,7 +68,7 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
         if(NetUtil.getNetworkState((this))!=NetUtil.NETWORN_NONE)
         {
             Log.d("myWeather","网络OK");
-            Toast.makeText(MainActivity.this,"网络OK!",Toast.LENGTH_LONG).show();//这行是显示在APP里的
+            Toast.makeText(MainActivity.this,"网络OK!",Toast.LENGTH_LONG).show();//这行是显示在APP里的，toast显示框
         }else
         {
             Log.d("myWeather","网络挂了");
@@ -87,6 +87,10 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
             Intent i = new Intent(this,SelectCity.class);//Intent调用另一个Activity
             //startActivity(i);
             startActivityForResult(i,1);
+            /*　startActivityForResult(Intent intent, int requestCode);
+                第一个参数：一个Intent对象，用于携带将跳转至下一个界面中使用的数据，使用putExtra(A,B)方法，此处存储的数据类型特别多，基本类型全部支持。
+                第二个参数：如果>= 0,当Activity结束时requestCode将归还在onActivityResult()中。以便确定返回的数据是从哪个Activity中返回，它用来标识目标activity。
+                */
         }
 
         //如果点击的按钮id是刷新按钮的id
@@ -436,11 +440,18 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
         }
     }
 
-    //接收返回的数据 ---weather08-2
+    //接收城市管理界面返回的数据 ---weather08-2
+    /*
+    onActivityResult(int requestCode, int resultCode, Intent data)
+    第一个参数：这个整数requestCode用于与startActivityForResult中的requestCode中值进行比较判断，是以便确认返回的数据是从哪个Activity返回的。
+    第二个参数：这整数resultCode是由子Activity通过其setResult()方法返回。适用于多个activity都返回数据时，来标识到底是哪一个activity返回的值。
+    第三个参数：一个Intent对象，带有返回的数据。可以通过data.getXXXExtra( );方法来获取指定数据类型的数据，
+    getStringExtra()
+    获取Intent对象携带的String类型的数据*/
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         if(requestCode == 1 && resultCode == RESULT_OK){
-            String newCityCode = data.getStringExtra("cityCode");//这个cityCode是哪里定义的?---SelectCity.java里的i.putExtra
-            Log.d("myWeather","选择的城市代码为"+newCityCode);
+            String newCityCode = data.getStringExtra("cityCode");//cityCode---SelectCity.java里的i.putExtra
+            Log.d("myWeather","选择的城市代码为"+ newCityCode);
 
             if(NetUtil.getNetworkState(this)!=NetUtil.NETWORN_NONE){
                 Log.d("myWeather","网络OK");
