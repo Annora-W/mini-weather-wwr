@@ -3,7 +3,6 @@ package com.example.annora.weather;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.Image;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -26,10 +25,12 @@ import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import cn.edu.pku.zhangqixun.bean.TodayWeather;
+import cn.pku.edu.wwr.bean.TodayWeather;
 import cn.pku.edu.wwr.util.NetUtil;
 
 
+/*implements View.OnClickListener添加按钮单击事件
+implements是一个类，实现一个接口用的关键字，它是用来实现接口中定义的抽象方法。*/
 public class MainActivity extends Activity implements View.OnClickListener{ //项目中所有活动必须继承Activity或它的子类才能拥有活动的特性
 
     private ImageView mUpdateBtn;//刷新按钮---weather05
@@ -42,9 +43,14 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
 
     //通过消息机制，将解析的天气对象发给主线程，主线程接收后调用updateTodayWeather来更新UI界面
    private static final int UPDATE_TODAY_WEATHER = 1;// ---weather07
-    private Handler mHandler = new Handler() { // ---weather07
-        public void handleMessage(android.os.Message msg){
-            switch (msg.what){
+    private Handler mHandler = new Handler() { // ---weather07 //Handler主要有两个用途:首先是可以定时处理或者分发消息，其次是可以添加一个执行的行为在其它线程中执行
+        /*消息android.os.Message：
+        是定义一个Messge包含必要的描述和属性数据，并且此对象可以被发送给android.os.Handler处理。
+        属性字段：arg1、arg2、what、obj、replyTo等；其中arg1和arg2是用来存放整型数据的；what是用来保存消息标示的；obj是Object类型的任意对象；replyTo是消息管理器，
+        会关联到一个handler，handler就是处理其中的消息。通常对Message对象不是直接new出来的，只要调用handler中的obtainMessage方法来直接获得Message对象。
+        https://www.cnblogs.com/to-creat/p/4964458.html*/
+        public void handleMessage(android.os.Message msg){//覆盖handleMessage方法
+            switch (msg.what){//根据收到的消息的what类型处理
                 case UPDATE_TODAY_WEATHER:
                     updateTodayWeather((TodayWeather) msg.obj);
                     break;
@@ -82,7 +88,7 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
     @Override
     public void onClick(View view) {
 
-        //如果点击的按钮id是城市管理按钮的id ---Weather08-2
+        //点击城市管理按钮---Weather08-2
         if(view.getId()==R.id.title_city_manager){
             Intent i = new Intent(this,SelectCity.class);//Intent调用另一个Activity
             //startActivity(i);
@@ -93,10 +99,17 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
                 */
         }
 
-        //如果点击的按钮id是刷新按钮的id
+        //点击刷新按钮
         if(view.getId()==R.id.title_update_btn)
         {
             //从SharedPreferences中读取城市的id
+            /*SharedPreferences（SP）是一种轻量级的数据存储方式,采用Key/value的方式进行映射，最终会在手机的/data/data/package_name/shared_prefs/目录下以xml的格式存在。
+            Sp通常用于记录一些参数配置、行为标记等。
+            注意：不要使用Sp去存储量大的数据，否则会大大影响应用性能，甚至出现ANR
+            # getSharedPreferences(name, mode)获取一个SharedPreferences
+            参数1:name在/data/data/package_name/shared_prefs/目录下生成的文件的名字(如果该文件不存在就会创建，如果存在则更新)
+            参数2:mode该文件的访问模式(Context.MODE_PRIVATE:默认的创建模式，只能由创建它的或者UID相同的应用程序访问，其余三种已经废弃)
+            */
             SharedPreferences sharedPreferences = getSharedPreferences("config",MODE_PRIVATE);
             String cityCode = sharedPreferences.getString("main_city_code","101010100");//从SharedPreferences中读取城市的id，如果没有就默认为101010100，，101120510
             Log.d("myWeather",cityCode);
@@ -124,24 +137,24 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
         new Thread(new Runnable() {
             @Override
             public void run() {
-                HttpURLConnection con = null;
+                HttpURLConnection con = null;//HttpURLConnection是访问HTTP协议的基本功能的类，继承自URLConnection，可用于向指定网站发送GET请求、POST请求。
                 TodayWeather todayWeather = null;// ---weather07
                 try{
                     URL url = new URL(address);//定义URL
                     con = (HttpURLConnection)url.openConnection();//到URL所引用的远程对象的链接
-                    con.setRequestMethod("GET");
-                    con.setConnectTimeout(8000);//设置连接超时
-                    con.setReadTimeout(8000);//设置读取超时
+                    con.setRequestMethod("GET");//GET是从服务器上获取数据，POST是向服务器传送数据
+                    con.setConnectTimeout(8000);//设置连接超时：建立连接的时间。如果到了指定的时间，还没建立连接，则报异常
+                    con.setReadTimeout(8000);//设置读取超时：已经建立连接，并开始读取服务端资源。如果到了指定的时间，没有可能的数据被客户端读取，则报异常。
                     InputStream in = con.getInputStream();//得到网络返回的输入流
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                    StringBuilder response = new StringBuilder();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(in));//BufferedReader从字符输入流中读取文本，缓冲各个字符，从而实现字符、数组和行的高效读取。
+                    StringBuilder response = new StringBuilder();//StringBuilder适用于单线程下在字符缓冲区进行大量操作的情况
                     String str;
-                    while((str=reader.readLine())!=null)
+                    while((str=reader.readLine())!=null)//读取网络数据并连接成字符串
                     {
-                        response.append(str);
+                        response.append(str);//字符串连接
                         Log.d("myWeather",str);
                     }
-                    String responseStr = response.toString();
+                    String responseStr = response.toString();//返回一个与构建器或缓冲器内容相同的字符串，这个字符串就是读取网络数据得到的信息
                     Log.d("myWeather",responseStr);
 
                     //parseXML(responseStr);//获取网络数据后，调用解析函数 ---Weather06
@@ -150,9 +163,10 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
                     {
                         Log.d("myWeather",todayWeather.toString());
 
+                        //使用Message机制主要是为了保证线程之间操作安全，同时不需要关心具体的消息接收者，使消息本身和线程剥离开，这样就可以方便的实现定时、异步等操作。
                         Message msg = new Message();
-                        msg.what = UPDATE_TODAY_WEATHER;
-                        msg.obj = todayWeather;
+                        msg.what = UPDATE_TODAY_WEATHER;//what是用来保存消息标示的
+                        msg.obj = todayWeather;//obj是Object类型的任意对象
                         mHandler.sendMessage(msg);
                     }
 
@@ -218,28 +232,34 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
         int typeCount = 0;
 
         try {
-            XmlPullParserFactory fac = XmlPullParserFactory.newInstance();
-            XmlPullParser xmlPullParser = fac.newPullParser();
-            xmlPullParser.setInput(new StringReader(xmldata));
-            int eventType = xmlPullParser.getEventType();
+            //Android中解析XML的方式主要有三种:sax,dom和pull，这里使用pull方法
+            XmlPullParserFactory fac = XmlPullParserFactory.newInstance();//创建生产XML的pull解析器的工厂
+            XmlPullParser xmlPullParser = fac.newPullParser();//使用工厂获取pull解析器
+            xmlPullParser.setInput(new StringReader(xmldata));//使用解析器读取当前的xml流，传入InputStream对象 并且设置解码规则需和XML文档中设置的一致
+            int eventType = xmlPullParser.getEventType();//获取当前事件的状态
             Log.d("myWeather", "parseXML");
-            while (eventType != XmlPullParser.END_DOCUMENT) {
+            /* pull解析是以事件为单位解析的，因此要获取一开始的解析标记type，之后通过type判断循环来读取文档
+            注意：当解析器开始读取is的时候已经开始了，指针type在xml的第一行开始。
+            pull解析是指针从第一行开始读取到最后一行以事件为单位读取的解析方式*/
+            while (eventType != XmlPullParser.END_DOCUMENT) {//通过while循环判断是否读取到了文档结束
                 switch (eventType) {
                     //判断当前事件是否为文档开始事件
                     case XmlPullParser.START_DOCUMENT:
                         break;
                     //判断当前事件是否为标签元素开始事件
                     case XmlPullParser.START_TAG:
+                        //判断当前遇到的元素名称是否为resp（这个<resp>在xml文件里起始的地方）
                         if(xmlPullParser.getName().equals("resp"))
                         {
-                            todayWeather = new TodayWeather();
+                            todayWeather = new TodayWeather();//初始化TodayWeather对象
                         }
-                        if(todayWeather != null)
+                        if(todayWeather != null)//已有初始化的TodayWeather对象，开始解析下面的数据
                         {
+                            //判断当前遇到的元素名称是否为city
                             if (xmlPullParser.getName().equals("city")) {
-                                eventType = xmlPullParser.next();
+                                eventType = xmlPullParser.next();//获取下一个事件的状态
                                 //Log.d("myWeather", "city: " + xmlPullParser.getText());
-                                todayWeather.setCity(xmlPullParser.getText());
+                                todayWeather.setCity(xmlPullParser.getText());//将数据封装到TodayWeather类中
                             } else if (xmlPullParser.getName().equals("updatetime")) {
                                 eventType = xmlPullParser.next();
                                 //Log.d("myWeather", "updatetime: " + xmlPullParser.getText());
@@ -292,7 +312,6 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
                                 typeCount++;//
                             }
                         }
-
                         break;
                     //判断当前事件是否为标签元素结束事件
                     case XmlPullParser.END_TAG:

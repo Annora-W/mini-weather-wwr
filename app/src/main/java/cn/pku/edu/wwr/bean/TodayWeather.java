@@ -1,4 +1,4 @@
-package cn.edu.pku.zhangqixun.bean;
+package cn.pku.edu.wwr.bean;
 
 import android.util.Log;
 

@@ -1,40 +1,27 @@
 package com.example.annora.weather;
 
-import android.Manifest;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import cn.edu.pku.zhangqixun.bean.City;
+import cn.pku.edu.wwr.bean.City;
 import cn.pku.edu.wwr.App.MyApplication;
 
 //选择城市界面的---Weather08
 public class SelectCity extends Activity implements View.OnClickListener{
 
     private ImageView mBackBtn;//返回按钮
-    private String cityCode;//返回到城市编码
+    private String cityCode; //返回到城市编码
     private TextView titleName;//顶部标题的文字控件
 
     /*ListView三种适配器的使用例子*/
@@ -89,6 +76,9 @@ public class SelectCity extends Activity implements View.OnClickListener{
                 Log.d("myWeather","click back");
                 Intent i=new Intent();//weather08-2
                 //i.putExtra("cityCode","101160101");
+                if(cityCode==null){//没有选择
+                    cityCode="101010100";//默认为北京（bug：这个如果改成点城市管理按钮传入主界面的citycode）
+                }
                 i.putExtra("cityCode",cityCode);//putExtra将计算的值回传回去；返回城市编号--weather08-2
                 setResult(RESULT_OK, i);//weather08-2
                 finish();//结束当前的activity的生命周期
