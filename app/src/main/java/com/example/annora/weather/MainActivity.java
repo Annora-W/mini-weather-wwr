@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,9 +34,10 @@ import cn.pku.edu.wwr.util.NetUtil;
 implements是一个类，实现一个接口用的关键字，它是用来实现接口中定义的抽象方法。*/
 public class MainActivity extends Activity implements View.OnClickListener{ //项目中所有活动必须继承Activity或它的子类才能拥有活动的特性
 
+    //按钮
     private ImageView mUpdateBtn;//刷新按钮---weather05
     private ImageView mCitySelect;//左上方，选择城市按钮---weather08
-
+    private ProgressBar mUpdateProgressBar;//刷新按钮动画
     //文字控件、图片控件
     private TextView cityTv, timeTv, humidityTv, weekTv, pmDataTv,
             pmQualityTv, temperatureTv, climateTv, windTv, city_name_Tv;// ---weather07
@@ -51,8 +53,11 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
         https://www.cnblogs.com/to-creat/p/4964458.html*/
         public void handleMessage(android.os.Message msg){//覆盖handleMessage方法
             switch (msg.what){//根据收到的消息的what类型处理
+                //更新今日天气
                 case UPDATE_TODAY_WEATHER:
                     updateTodayWeather((TodayWeather) msg.obj);
+                    mUpdateBtn.setVisibility(View.VISIBLE);
+                    mUpdateProgressBar.setVisibility(View.GONE);
                     break;
                 default:
                     break;
@@ -65,12 +70,14 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
         super.onCreate(savedInstanceState);
         setContentView(R.layout.weather_info);//在Activity中指定布局文件
 
-        mUpdateBtn = (ImageView) findViewById(R.id.title_update_btn);//weather05
-        mUpdateBtn.setOnClickListener(this);//weather05
-
-        mCitySelect = (ImageView) findViewById(R.id.title_city_manager);// ---weather08
+        //Buttons
+        mCitySelect = (ImageView) findViewById(R.id.title_city_manager);//城市管理按钮 ---weather08
         mCitySelect.setOnClickListener(this);// ---weather08
+        mUpdateBtn = (ImageView) findViewById(R.id.title_update_btn);//刷新按钮 weather05
+        mUpdateBtn.setOnClickListener(this);//weather05
+        mUpdateProgressBar = (ProgressBar)findViewById(R.id.title_update_progress);//刷新动画，不需要设置点击事件
 
+        //检查网络状态
         if(NetUtil.getNetworkState((this))!=NetUtil.NETWORN_NONE)
         {
             Log.d("myWeather","网络OK");
@@ -80,8 +87,8 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
             Log.d("myWeather","网络挂了");
             Toast.makeText(MainActivity.this,"网络挂了！",Toast.LENGTH_LONG).show();
         }
-
-        initView();//初始化控件内容 ---weather07
+        //初始化控件内容
+        initView(); //---weather07
     }
 
     //为更新按钮添加单击事件 weather05
@@ -130,6 +137,9 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
     //使用 获取网络数据 ---weather05
     private void queryWeatherCode(String citycode)
     {
+        mUpdateBtn.setVisibility(View.GONE);
+        mUpdateProgressBar.setVisibility(View.VISIBLE);
+
         final String address = "http://wthrcdn.etouch.cn/WeatherApi?citykey=" + citycode;//URL
         Log.d("myWeather",address);
 
@@ -159,7 +169,7 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
 
                     //parseXML(responseStr);//获取网络数据后，调用解析函数 ---Weather06
                     todayWeather = parseXML(responseStr);//解析网络数据 ---Weather07
-                    if(todayWeather != null)// ---Weather07
+                    if(todayWeather != null)//这里更新今日天气信息 ---Weather07
                     {
                         Log.d("myWeather",todayWeather.toString());
 

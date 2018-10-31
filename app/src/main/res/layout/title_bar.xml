@@ -24,7 +24,7 @@
         android:layout_toRightOf="@id/title_city_manager"
         android:background="#A71717"/>
 
-    <!--北京天气，注意-->
+    <!--北京天气-->
     <TextView
         android:id="@+id/title_city_name"
         android:layout_width="fill_parent"
@@ -36,28 +36,44 @@
         android:textColor="#ffffffff"
         android:textSize="22.0sp"/>
 
-    <!--刷新图标-->
-    <ImageView
-        android:id="@+id/title_update_btn"
-        android:layout_width="45.0dip"
-        android:layout_height="45.0dip"
-        android:layout_alignParentRight="true"
-        android:layout_gravity="center"
-        android:src="@drawable/title_update"/>
-
-    <!--北京天气-->
-    <ImageView
-        android:id="@+id/title_share"
-        android:layout_width="45.0dip"
-        android:layout_height="45.0dip"
-        android:layout_toLeftOf="@id/title_update_btn"
-        android:src="@drawable/title_share"/>
-
-    <!--北京天气-->
-    <ImageView
-        android:id="@+id/title_location"
-        android:layout_width="45.0dip"
-        android:layout_height="45.0dip"
-        android:layout_toLeftOf="@id/title_share"
-        android:src="@drawable/base_action_bar_action_city"/>
+    <!--右侧小图标-->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:layout_alignParentRight="true">
+        <!--定位按钮-->
+        <ImageView
+            android:id="@+id/title_location"
+            android:layout_width="45.0dip"
+            android:layout_height="45.0dip"
+            android:src="@drawable/base_action_bar_action_city"/>
+        <!--分享按钮-->
+        <ImageView
+            android:id="@+id/title_share"
+            android:layout_width="45.0dip"
+            android:layout_height="45.0dip"
+            android:src="@drawable/title_share"/>
+        <!--刷新按钮-->
+        <FrameLayout
+            android:id="@+id/title_update"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_alignParentRight="true"
+            android:layout_gravity="center">
+            <!--静态图片-->
+            <ImageView
+                android:id="@+id/title_update_btn"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:src="@drawable/title_update"/>
+            <!--旋转动画效果-->
+            <ProgressBar
+                android:id="@+id/title_update_progress"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                style="@style/title_update_progressbar_style"
+                android:visibility="gone"/>
+        </FrameLayout>
+    </LinearLayout>
 </RelativeLayout>
+

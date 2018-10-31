@@ -43,6 +43,33 @@
             android:gravity="center"/>
     </RelativeLayout>
 
+    <!--drawableLeft在文字框左侧添加一个图片；
+    drawablePadding图片和文字的距离
+    singleLine单行显示-->
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ffbec0c3">
+            <EditText
+                android:id="@+id/search_edit"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:hint="搜索全国城市（中文/拼音）"
+                android:layout_margin="10dp"
+                android:drawableLeft="@drawable/magnifying_glass"
+                android:drawablePadding="8dp"
+                android:paddingBottom="8dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="30dp"
+                android:paddingTop="8dp"
+                android:singleLine="true"
+                android:background="@drawable/contact_search_box_edittext_keyword_background"
+                android:textColor="#ff000000"
+                android:textColorHint="#ffcccccc"
+                android:textSize="15.0sp" />
+        </RelativeLayout>
+
+
     <ListView
         android:id="@+id/list_view"
         android:layout_width="match_parent"
