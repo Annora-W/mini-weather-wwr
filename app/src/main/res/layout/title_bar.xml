@@ -72,6 +72,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 style="@style/title_update_progressbar_style"
+                android:indeterminateOnly="true"
                 android:visibility="gone"/>
         </FrameLayout>
     </LinearLayout>

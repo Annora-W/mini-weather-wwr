@@ -3,10 +3,14 @@ package com.example.annora.weather;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -14,6 +18,7 @@ import android.widget.Toast;
 
 import java.util.List;
 
+import cn.pku.edu.wwr.Adapter.SearchCityAdapter;
 import cn.pku.edu.wwr.bean.City;
 import cn.pku.edu.wwr.App.MyApplication;
 
@@ -23,7 +28,44 @@ public class SelectCity extends Activity implements View.OnClickListener{
     private ImageView mBackBtn;//返回按钮
     private String cityCode; //返回到城市编码
     private TextView titleName;//顶部标题的文字控件
+    private EditText mSearchEditText;//搜索框
+    private SearchCityAdapter mSearchCityAdapter;//搜索城市的适配器
+    private ArrayAdapter<String> cityAdapter;//所有城市的适配器
+    private List<City> mCityList;//城市列表
+    private ListView mCityListView;//城市管理界面的ListView
 
+    //使用TextWatcher监听EditText变化
+    TextWatcher mTextWatcher = new TextWatcher() {
+        //变化前
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+        //变化中
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            mSearchCityAdapter = new SearchCityAdapter(SelectCity.this, mCityList);//根据输入的内容创建适配器
+
+            mCityListView.setTextFilterEnabled(true);//数据过滤
+            if(mCityList.size() < 1 || TextUtils.isEmpty(s)){//输入为空或者城市列表为空
+                mCityListView.setAdapter(cityAdapter);
+                //mCityContainer.setVisibility(View.VISIBLE);//显示原始城市列表 View.VISIBLE--->可见
+                //mSearchContainer.setVisibility(View.INVISIBLE);//View.INVISIBLE--->不可见，但这个View仍然会占用在xml文件中所分配的布局空间，不重新layout
+                //mClearSearchBtn.setVisibility(View.GONE);//不可见，但这个View在ViewGroup中不保留位置，会重新layout，不再占用空间，那后面的view就会取代他的位置，
+            }else{
+                mCityListView.setAdapter(mSearchCityAdapter);//重置ListView的适配器
+                //mClearSearchBtn.setVisibility(View.VISIBLE);//显示清除输入按钮
+                //mCityContainer.setVisibility(View.INVISIBLE);
+                //mSearchContainer.setVisibility(View.VISIBLE);//显示查找的城市列表
+                mSearchCityAdapter.getFilter().filter(s);//数据的过滤以及刷新展示
+            }
+        }
+        //变化后
+        @Override
+        public void afterTextChanged(Editable s) {
+
+        }
+    };
     /*ListView三种适配器的使用例子*/
     //level1
    /* private String[] data={"第1组","第2组","第3组","第4组","第5组","第6组","第7组","第8组",
@@ -94,23 +136,29 @@ public class SelectCity extends Activity implements View.OnClickListener{
         /*ListView三种适配器的使用*/
         //--level1
         MyApplication mApplication = MyApplication.getInstance();
-        final List<City> cityList=mApplication.getCityList();//获取城市列表
-        final String[] viewList = new String[cityList.size()];//显示在ListView中的数据
+        mCityList = mApplication.getCityList();//获取城市列表
+        final String[] viewList = new String[mCityList.size()];//显示在ListView中的数据
         int i=0;
-        for(City city:cityList){
+        for(City city:mCityList){
             viewList[i]=city.getCity();
             i++;
         }
-        ListView mlistView=(ListView)findViewById(R.id.list_view);
-        ArrayAdapter<String> adapter=new ArrayAdapter<String>(//适配器
+        mCityListView = (ListView)findViewById(R.id.list_view);
+        cityAdapter = new ArrayAdapter<String>(//适配器
                 SelectCity.this,
                 android.R.layout.simple_list_item_1,
                 viewList);//适配器
-        mlistView.setAdapter(adapter);
-        mlistView.setOnItemClickListener(new AdapterView.OnItemClickListener() {//单击ListView的响应事件
+        mCityListView.setAdapter(cityAdapter);
+        //ListView适配器的单击响应事件
+        mCityListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {//单击ListView的响应事件
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                City city = cityList.get(position);
+                City city;
+                if(mSearchCityAdapter != null){
+                    city = /*mCityList.get(position);*/(City)mSearchCityAdapter.getItem(position);
+                }
+                else
+                    city = mCityList.get(position);
                 cityCode = city.getNumber();
                 updateTitleName(city.getCity());
                 Toast.makeText(SelectCity.this,"你单击了"+position+"："+ city.getCity() +"，编码为"+ cityCode,Toast.LENGTH_SHORT).show();
@@ -169,7 +217,9 @@ public class SelectCity extends Activity implements View.OnClickListener{
     //初始化UI控件
     void InitView(){
         //将控件名与id关联
-        titleName=(TextView)findViewById(R.id.title_name);
+        titleName=(TextView)findViewById(R.id.title_name);//标题名
+        mSearchEditText=(EditText)findViewById(R.id.search_edit);//搜索框
+        mSearchEditText.addTextChangedListener(mTextWatcher);
 
         //初始化控件内容
         titleName.setText("当前城市：北京");

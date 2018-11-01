@@ -4,7 +4,6 @@
     android:layout_height="match_parent">
 
     <ProgressBar
-        android:id="@+id/title_update_process"
         android:layout_width="45dp"
         android:layout_height="45dp"
         style="@style/title_update_progressbar_style"/>
