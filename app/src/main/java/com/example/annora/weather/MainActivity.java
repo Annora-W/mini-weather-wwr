@@ -1,12 +1,14 @@
 package com.example.annora.weather;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -26,8 +28,12 @@ import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import cn.pku.edu.wwr.App.MyApplication;
+import cn.pku.edu.wwr.bean.City;
 import cn.pku.edu.wwr.bean.TodayWeather;
+import cn.pku.edu.wwr.db.CityDB;
 import cn.pku.edu.wwr.util.NetUtil;
+import cn.pku.edu.wwr.util.SharedPreferenceUtil;
 
 
 /*implements View.OnClickListener添加按钮单击事件
@@ -42,6 +48,9 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
     private TextView cityTv, timeTv, humidityTv, weekTv, pmDataTv,
             pmQualityTv, temperatureTv, climateTv, windTv, city_name_Tv;// ---weather07
     private ImageView weatherImg, pmImg;// ---weather07
+    private String mCurCityCode;//当前选择的城市编码
+    private SharedPreferenceUtil mSpUtil;
+    private MyApplication mApplication;
 
     //通过消息机制，将解析的天气对象发给主线程，主线程接收后调用updateTodayWeather来更新UI界面
    private static final int UPDATE_TODAY_WEATHER = 1;// ---weather07
@@ -87,8 +96,16 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
             Log.d("myWeather","网络挂了");
             Toast.makeText(MainActivity.this,"网络挂了！",Toast.LENGTH_LONG).show();
         }
+        //初始化一些数据
+        initData();
         //初始化控件内容
         initView(); //---weather07
+    }
+
+    //初始化数据
+    private void initData(){
+        mApplication = MyApplication.getInstance();
+        mSpUtil = mApplication.getSharedPreferenceUtil();
     }
 
     //为更新按钮添加单击事件 weather05
@@ -117,15 +134,28 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
             参数1:name在/data/data/package_name/shared_prefs/目录下生成的文件的名字(如果该文件不存在就会创建，如果存在则更新)
             参数2:mode该文件的访问模式(Context.MODE_PRIVATE:默认的创建模式，只能由创建它的或者UID相同的应用程序访问，其余三种已经废弃)
             */
-            SharedPreferences sharedPreferences = getSharedPreferences("config",MODE_PRIVATE);
-            String cityCode = sharedPreferences.getString("main_city_code","101010100");//从SharedPreferences中读取城市的id，如果没有就默认为101010100，，101120510
-            Log.d("myWeather",cityCode);
 
             //检测是否有网络，如果有就执行“获取网络数据”的函数
             if(NetUtil.getNetworkState((this))!=NetUtil.NETWORN_NONE)
             {
                 Log.d("myWeather","网络OK");
-                queryWeatherCode(cityCode);//获取网络数据
+
+//                SharedPreferences sharedPreferences = getSharedPreferences("config", MODE_PRIVATE);
+//                String cityCode = sharedPreferences.getString("main_city_code", "101010100");//从SharedPreferences中读取城市的id，如果没有就默认为101010100，，101120510
+//                Log.d("myWeather", cityCode + "没有选择默认为北京");
+
+                String cityCode;
+                //如果存在SharedPreferences的城市编码为空，就默认设置为北京
+                if(TextUtils.isEmpty(mSpUtil.getCurCityCode())){
+                    mSpUtil.setCurCityCode("101010100");//把默认城市北京保存到SharedPreferences
+                    cityCode = mSpUtil.getCurCityCode();
+                    Log.d("SP","获取默认编码为："+ cityCode);
+                }else {
+                    //mCurCity = mCityDB.getCity(mSpUtil.getCity());
+                    cityCode = mSpUtil.getCurCityCode();//获取城市编码
+                    Log.d("SP","获取编码为："+ cityCode);
+                    queryWeatherCode(cityCode);//获取网络数据
+                }
             }else
             {
                 Log.d("myWeather","网络挂了");
@@ -140,6 +170,8 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
         mUpdateBtn.setVisibility(View.GONE);
         mUpdateProgressBar.setVisibility(View.VISIBLE);
 
+        if(citycode == "-1")//这个没用
+            return;
         final String address = "http://wthrcdn.etouch.cn/WeatherApi?citykey=" + citycode;//URL
         Log.d("myWeather",address);
 
@@ -373,6 +405,98 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
     //用TodayWeather对象更新UI控件显示 ---weather07
     void updateTodayWeather(TodayWeather todayWeather)
     {
+        //改pm2.5图片
+        if(todayWeather.getPm25() != null) {
+            int pm25Int = Integer.parseInt(todayWeather.getPm25());
+            Log.d("myWeather", String.valueOf(pm25Int));
+            pmImg.setVisibility(View.VISIBLE);
+            if (pm25Int <= 50) {
+                pmImg.setImageResource(R.drawable.biz_plugin_weather_0_50);
+            } else if (pm25Int > 50 && pm25Int <= 100) {
+                pmImg.setImageResource(R.drawable.biz_plugin_weather_51_100);
+            } else if (pm25Int > 100 && pm25Int <= 150) {
+                pmImg.setImageResource(R.drawable.biz_plugin_weather_101_150);
+            } else if (pm25Int > 150 && pm25Int <= 200) {
+                pmImg.setImageResource(R.drawable.biz_plugin_weather_151_200);
+            } else if (pm25Int > 200 && pm25Int <= 300) {
+                pmImg.setImageResource(R.drawable.biz_plugin_weather_201_300);
+            } else if (pm25Int > 300) {
+                pmImg.setImageResource(R.drawable.biz_plugin_weather_greater_300);
+            }
+        }else{
+            pmImg.setVisibility(View.INVISIBLE);
+        }
+        //改天气状况图片
+        if(todayWeather.getType() != null) {
+            String type = todayWeather.getType();
+            weatherImg.setVisibility(View.VISIBLE);
+            switch (type) {
+                case "暴雪":
+                    weatherImg.setImageResource(R.drawable.biz_plugin_weather_baoxue);
+                    break;
+                case "暴雨":
+                    weatherImg.setImageResource(R.drawable.biz_plugin_weather_baoyu);
+                    break;
+                case "大暴雨":
+                    weatherImg.setImageResource(R.drawable.biz_plugin_weather_dabaoyu);
+                    break;
+                case "大雪":
+                    weatherImg.setImageResource(R.drawable.biz_plugin_weather_daxue);
+                    break;
+                case "大雨":
+                    weatherImg.setImageResource(R.drawable.biz_plugin_weather_dayu);
+                    break;
+                case "多云":
+                    weatherImg.setImageResource(R.drawable.biz_plugin_weather_duoyun);
+                    break;
+                case "雷阵雨":
+                    weatherImg.setImageResource(R.drawable.biz_plugin_weather_leizhenyu);
+                    break;
+                case "雷阵雨冰雹":
+                    weatherImg.setImageResource(R.drawable.biz_plugin_weather_leizhenyubingbao);
+                    break;
+                case "晴":
+                    weatherImg.setImageResource(R.drawable.biz_plugin_weather_qing);
+                    break;
+                case "沙尘暴":
+                    weatherImg.setImageResource(R.drawable.biz_plugin_weather_shachenbao);
+                    break;
+                case "特大暴雨":
+                    weatherImg.setImageResource(R.drawable.biz_plugin_weather_tedabaoyu);
+                    break;
+                case "雾":
+                    weatherImg.setImageResource(R.drawable.biz_plugin_weather_wu);
+                    break;
+                case "小雪":
+                    weatherImg.setImageResource(R.drawable.biz_plugin_weather_xiaoxue);
+                    break;
+                case "小雨":
+                    weatherImg.setImageResource(R.drawable.biz_plugin_weather_xiaoyu);
+                    break;
+                case "阴":
+                    weatherImg.setImageResource(R.drawable.biz_plugin_weather_yin);
+                    break;
+                case "雨夹雪":
+                    weatherImg.setImageResource(R.drawable.biz_plugin_weather_yujiaxue);
+                    break;
+                case "阵雪":
+                    weatherImg.setImageResource(R.drawable.biz_plugin_weather_zhenxue);
+                    break;
+                case "阵雨":
+                    weatherImg.setImageResource(R.drawable.biz_plugin_weather_zhenyu);
+                    break;
+                case "中雪":
+                    weatherImg.setImageResource(R.drawable.biz_plugin_weather_zhongxue);
+                    break;
+                case "中雨":
+                    weatherImg.setImageResource(R.drawable.biz_plugin_weather_zhongyu);
+                    break;
+            }
+        }else{
+            weatherImg.setVisibility(View.INVISIBLE);
+        }
+        todayWeather.missData();//将缺失的数据设置为"N/A"
+
         //文字控件--根据网络数据刷新UI的文字
         city_name_Tv.setText(todayWeather.getCity() + "天气");//红条上的，北京天气
         cityTv.setText(todayWeather.getCity());//布局上左侧的，城市名
@@ -384,89 +508,6 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
         temperatureTv.setText(todayWeather.getHigh() + "~" + todayWeather.getLow());//布局中间的，温度
         climateTv.setText(todayWeather.getType());//布局中间的，天气情况
         windTv.setText("风力：" + todayWeather.getFengli());//布局中间的，风力
-
-        //改pm2.5图片
-        int pm25Int = Integer.parseInt(todayWeather.getPm25());
-        Log.d("myWeather", String.valueOf(pm25Int));
-        if(pm25Int<=50) {
-            pmImg.setImageResource(R.drawable.biz_plugin_weather_0_50);
-        }else if(pm25Int>50 && pm25Int<=100) {
-            pmImg.setImageResource(R.drawable.biz_plugin_weather_51_100);
-        }else if(pm25Int>100 && pm25Int<=150){
-            pmImg.setImageResource(R.drawable.biz_plugin_weather_101_150);
-        }else if(pm25Int>150 && pm25Int<=200){
-            pmImg.setImageResource(R.drawable.biz_plugin_weather_151_200);
-        }else if(pm25Int>200 && pm25Int<=300){
-            pmImg.setImageResource(R.drawable.biz_plugin_weather_201_300);
-        }else if(pm25Int>300) {
-            pmImg.setImageResource(R.drawable.biz_plugin_weather_greater_300);
-        }
-
-        //改天气状况图片
-        String type = todayWeather.getType();
-        switch (type)
-        {
-            case "暴雪":
-                weatherImg.setImageResource(R.drawable.biz_plugin_weather_baoxue);
-                break;
-            case "暴雨":
-                weatherImg.setImageResource(R.drawable.biz_plugin_weather_baoyu);
-                break;
-            case "大暴雨":
-                weatherImg.setImageResource(R.drawable.biz_plugin_weather_dabaoyu);
-                break;
-            case "大雪":
-                weatherImg.setImageResource(R.drawable.biz_plugin_weather_daxue);
-                break;
-            case "大雨":
-                weatherImg.setImageResource(R.drawable.biz_plugin_weather_dayu);
-                break;
-            case "多云":
-                weatherImg.setImageResource(R.drawable.biz_plugin_weather_duoyun);
-                break;
-            case "雷阵雨":
-                weatherImg.setImageResource(R.drawable.biz_plugin_weather_leizhenyu);
-                break;
-            case "雷阵雨冰雹":
-                weatherImg.setImageResource(R.drawable.biz_plugin_weather_leizhenyubingbao);
-                break;
-            case "晴":
-                weatherImg.setImageResource(R.drawable.biz_plugin_weather_qing);
-                break;
-            case "沙尘暴":
-                weatherImg.setImageResource(R.drawable.biz_plugin_weather_shachenbao);
-                break;
-            case "特大暴雨":
-                weatherImg.setImageResource(R.drawable.biz_plugin_weather_tedabaoyu);
-                break;
-            case "雾":
-                weatherImg.setImageResource(R.drawable.biz_plugin_weather_wu);
-                break;
-            case "小雪":
-                weatherImg.setImageResource(R.drawable.biz_plugin_weather_xiaoxue);
-                break;
-            case "小雨":
-                weatherImg.setImageResource(R.drawable.biz_plugin_weather_xiaoyu);
-                break;
-            case "阴":
-                weatherImg.setImageResource(R.drawable.biz_plugin_weather_yin);
-                break;
-            case "雨夹雪":
-                weatherImg.setImageResource(R.drawable.biz_plugin_weather_yujiaxue);
-                break;
-            case "阵雪":
-                weatherImg.setImageResource(R.drawable.biz_plugin_weather_zhenxue);
-                break;
-            case "阵雨":
-                weatherImg.setImageResource(R.drawable.biz_plugin_weather_zhenyu);
-                break;
-            case "中雪":
-                weatherImg.setImageResource(R.drawable.biz_plugin_weather_zhongxue);
-                break;
-            case "中雨":
-                weatherImg.setImageResource(R.drawable.biz_plugin_weather_zhongyu);
-                break;
-        }
     }
 
     //接收城市管理界面返回的数据 ---weather08-2
@@ -478,16 +519,19 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
     getStringExtra()
     获取Intent对象携带的String类型的数据*/
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
-        if(requestCode == 1 && resultCode == RESULT_OK){
-            String newCityCode = data.getStringExtra("cityCode");//cityCode---SelectCity.java里的i.putExtra
-            Log.d("myWeather","选择的城市代码为"+ newCityCode);
+        if(requestCode == 1 && resultCode == RESULT_OK) {
+            if (data.getStringExtra("cityCode") != null) {//如果选择城市不为空
+                String newCityCode = data.getStringExtra("cityCode");//cityCode---SelectCity.java里的i.putExtra
+                Log.d("myWeather", "选择的城市代码为" + newCityCode);
 
-            if(NetUtil.getNetworkState(this)!=NetUtil.NETWORN_NONE){
-                Log.d("myWeather","网络OK");
-                queryWeatherCode(newCityCode);
-            }else {
-                Log.d("myWeather","网络挂了");
-                Toast.makeText(MainActivity.this,"网络挂了！",Toast.LENGTH_LONG).show();
+                if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
+                    Log.d("myWeather", "网络OK");
+                    mSpUtil.setCurCityCode(newCityCode);//选择完城市，设置城市编码
+                    queryWeatherCode(newCityCode);
+                } else {
+                    Log.d("myWeather", "网络挂了");
+                    Toast.makeText(MainActivity.this, "网络挂了！", Toast.LENGTH_LONG).show();
+                }
             }
         }
     }

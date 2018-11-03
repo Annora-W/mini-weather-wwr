@@ -9,72 +9,94 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:orientation="vertical">
-    <!--TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="我是一个临时的TextView，这里是选择城市界面"/-->
+        <!--TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="我是一个临时的TextView，这里是选择城市界面"/-->
 
-    <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="45.0dp"
-        android:background="#ffcd2626">
-        <TextView
-            android:id="@+id/title_name"
+        <!--红色标题栏-->
+        <RelativeLayout
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:gravity="center"
-            android:text="当前城市：北京"
-            android:textColor="#ffffffff"
-            android:textSize="20.0sp"/>
-        <ImageView
-            android:id="@+id/title_back"
-            android:layout_width="45.0dp"
             android:layout_height="45.0dp"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:src="@drawable/base_action_bar_back_normal"/>
-        <ImageView
-            android:layout_width="1.0dp"
-            android:layout_height="40dp"
-            android:layout_centerVertical="true"
-            android:layout_gravity="center"
-            android:layout_toRightOf="@id/title_back"
-            android:background="#A71717"
-            android:gravity="center"/>
-    </RelativeLayout>
+            android:background="#ffcd2626">
 
-    <!--drawableLeft在文字框左侧添加一个图片；
-    drawablePadding图片和文字的距离
-    singleLine单行显示-->
+            <TextView
+                android:id="@+id/title_name"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:gravity="center"
+                android:text="当前城市：北京"
+                android:textColor="#ffffffff"
+                android:textSize="20.0sp" />
+
+            <ImageView
+                android:id="@+id/title_back"
+                android:layout_width="45.0dp"
+                android:layout_height="45.0dp"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/base_action_bar_back_normal" />
+
+            <ImageView
+                android:layout_width="1.0dp"
+                android:layout_height="40dp"
+                android:layout_centerVertical="true"
+                android:layout_gravity="center"
+                android:layout_toRightOf="@id/title_back"
+                android:background="#A71717"
+                android:gravity="center" />
+        </RelativeLayout>
+
+        <!--搜索框-->
+        <!--drawableLeft在文字框左侧添加一个图片；
+        drawablePadding图片和文字的距离
+        singleLine单行显示-->
         <RelativeLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="#ffbec0c3">
+
             <EditText
                 android:id="@+id/search_edit"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:hint="搜索全国城市（中文/拼音）"
                 android:layout_margin="10dp"
+                android:background="@drawable/contact_search_box_edittext_keyword_background"
                 android:drawableLeft="@drawable/magnifying_glass"
                 android:drawablePadding="8dp"
+                android:hint="搜索全国城市（中文/拼音）"
                 android:paddingBottom="8dp"
                 android:paddingLeft="10dp"
                 android:paddingRight="30dp"
                 android:paddingTop="8dp"
                 android:singleLine="true"
-                android:background="@drawable/contact_search_box_edittext_keyword_background"
                 android:textColor="#ff000000"
                 android:textColorHint="#ffcccccc"
                 android:textSize="15.0sp" />
         </RelativeLayout>
 
 
-    <ListView
-        android:id="@+id/list_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </ListView>
+        <!--城市列表-->
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+            <ListView
+                android:id="@+id/list_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"></ListView>
+
+            <javaLayout.BladeView
+                android:id="@+id/citys_bladeview"
+                android:layout_width="40dip"
+                android:layout_height="fill_parent"
+                android:layout_alignParentRight="true"
+                android:background="#00000000"
+                android:paddingBottom="10.0dip"
+                android:paddingLeft="5.0dip"
+                android:paddingRight="5.0dip"
+                android:paddingTop="10.0dip" />
+        </RelativeLayout>
+
 
     </LinearLayout>
 </RelativeLayout>

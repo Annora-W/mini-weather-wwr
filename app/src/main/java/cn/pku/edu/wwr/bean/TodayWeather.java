@@ -10,17 +10,17 @@ import java.io.StringReader;
 
 //---Weather07
 public class TodayWeather {
-    private String city;
-    private String updatetime;
-    private String wendu;
-    private String shidu;
-    private String pm25;
-    private String quality;
-    private String fengxiang;
-    private String fengli;
-    private String date;
-    private String high;
-    private String low;
+    private String city;//城市名
+    private String updatetime;//更新时间
+    private String wendu;//温度
+    private String shidu;//湿度
+    private String pm25;//pm2.5
+    private String quality;//空气质量
+    private String fengxiang;//风向
+    private String fengli;//风力
+    private String date;//日期
+    private String high;//高温
+    private String low;//低温
     private String type;
 
     public String getCity() {
@@ -136,4 +136,23 @@ public class TodayWeather {
                 ", type='" + type + '\'' +
                 '}';
     }
+
+    public void missData(){
+        city = setMissData(city);
+        updatetime = setMissData(updatetime);
+        wendu = setMissData(wendu);
+        shidu = setMissData(shidu);
+        pm25 = setMissData(pm25);
+        quality = setMissData(quality);
+        fengxiang = setMissData(fengxiang);
+        fengli = setMissData(fengli);
+        date = setMissData(date);
+        high = setMissData(high);
+        low = setMissData(low);
+        type = setMissData(type);
+    }
+    public String setMissData(String data){
+        return data == null? "无数据": data;
+    }
+
 }

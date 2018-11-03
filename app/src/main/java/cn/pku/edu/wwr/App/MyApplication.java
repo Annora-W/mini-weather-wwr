@@ -1,6 +1,7 @@
 package cn.pku.edu.wwr.App;
 
 import android.app.Application;
+import android.content.SharedPreferences;
 import android.os.Environment;
 import android.util.Log;
 
@@ -13,14 +14,15 @@ import java.util.List;
 
 import cn.pku.edu.wwr.bean.City;
 import cn.pku.edu.wwr.db.CityDB;
+import cn.pku.edu.wwr.util.SharedPreferenceUtil;
 
 //---Weather09
 public class MyApplication extends Application{
     private static final String TAG="MyAPP";
-
     private static MyApplication myApplication;
     private CityDB mCityDB;
     private List<City> mCityList;//初始化城市信息列表//读取的每条数据库信息存在这里
+    private SharedPreferenceUtil mSpUtil;
 
     @Override
     public void onCreate(){
@@ -30,6 +32,7 @@ public class MyApplication extends Application{
         myApplication=this;
         mCityDB=openCityDB();//打开数据库
         initCityList();//初始化城市信息列表
+        mSpUtil = new SharedPreferenceUtil(this, SharedPreferenceUtil.CITY_SHAREPRE_FILE);
     }
 
     //getInstance()单例模式、不需要实例化
@@ -108,5 +111,12 @@ public class MyApplication extends Application{
     //返回城市列表
     public List<City> getCityList(){
         return mCityList;
+    }
+
+    public synchronized SharedPreferenceUtil getSharedPreferenceUtil(){
+        if(mSpUtil == null){
+            mSpUtil = new SharedPreferenceUtil(this, SharedPreferenceUtil.CITY_SHAREPRE_FILE);
+        }
+        return mSpUtil;
     }
 }

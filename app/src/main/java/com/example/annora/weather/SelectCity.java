@@ -16,11 +16,14 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.HashMap;
 import java.util.List;
 
 import cn.pku.edu.wwr.Adapter.SearchCityAdapter;
 import cn.pku.edu.wwr.bean.City;
 import cn.pku.edu.wwr.App.MyApplication;
+import cn.pku.edu.wwr.db.CityDB;
+import cn.pku.edu.wwr.util.SharedPreferenceUtil;
 
 //选择城市界面的---Weather08
 public class SelectCity extends Activity implements View.OnClickListener{
@@ -33,6 +36,9 @@ public class SelectCity extends Activity implements View.OnClickListener{
     private ArrayAdapter<String> cityAdapter;//所有城市的适配器
     private List<City> mCityList;//城市列表
     private ListView mCityListView;//城市管理界面的ListView
+    private SharedPreferenceUtil mSpUtil;
+    private MyApplication mApplication;
+    private HashMap<String, City> cityCode_cityHashMap;
 
     //使用TextWatcher监听EditText变化
     TextWatcher mTextWatcher = new TextWatcher() {
@@ -91,17 +97,27 @@ public class SelectCity extends Activity implements View.OnClickListener{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.select_city);
 
+        initData();//初始化数据
         //更新ListView
         updateListView();
+        InitView();//更新顶部当前城市文字
 
         //返回按钮
         mBackBtn = (ImageView)findViewById(R.id.title_back);
         mBackBtn.setOnClickListener(this);
 
         Log.d("SelectCity","SelectCity->oncreate");
+    }
 
-        //更新顶部当前城市文字
-        InitView();
+    //初始化数据
+    private void initData(){
+        mApplication = MyApplication.getInstance();
+        mCityList = mApplication.getCityList();//获取城市列表
+        mSpUtil = mApplication.getSharedPreferenceUtil();
+        cityCode_cityHashMap = new HashMap<>();
+        for(City city : mCityList){
+            cityCode_cityHashMap.put(city.getNumber(), city);
+        }
     }
 
     //返回按钮的单击事件
@@ -118,9 +134,6 @@ public class SelectCity extends Activity implements View.OnClickListener{
                 Log.d("myWeather","click back");
                 Intent i=new Intent();//weather08-2
                 //i.putExtra("cityCode","101160101");
-                if(cityCode==null){//没有选择
-                    cityCode="101010100";//默认为北京（bug：这个如果改成点城市管理按钮传入主界面的citycode）
-                }
                 i.putExtra("cityCode",cityCode);//putExtra将计算的值回传回去；返回城市编号--weather08-2
                 setResult(RESULT_OK, i);//weather08-2
                 finish();//结束当前的activity的生命周期
@@ -135,8 +148,6 @@ public class SelectCity extends Activity implements View.OnClickListener{
     {
         /*ListView三种适配器的使用*/
         //--level1
-        MyApplication mApplication = MyApplication.getInstance();
-        mCityList = mApplication.getCityList();//获取城市列表
         final String[] viewList = new String[mCityList.size()];//显示在ListView中的数据
         int i=0;
         for(City city:mCityList){
@@ -222,7 +233,9 @@ public class SelectCity extends Activity implements View.OnClickListener{
         mSearchEditText.addTextChangedListener(mTextWatcher);
 
         //初始化控件内容
-        titleName.setText("当前城市：北京");
+        //titleName.setText("当前城市：北京");
+        City curCity = cityCode_cityHashMap.get(mSpUtil.getCurCityCode());//根据当前城市编码得到城市名
+        titleName.setText("当前城市：" + curCity.getCity());
     }
 
     //更新顶部当前城市的文字
