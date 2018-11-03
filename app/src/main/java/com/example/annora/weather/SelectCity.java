@@ -18,12 +18,15 @@ import android.widget.Toast;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cn.pku.edu.wwr.Adapter.SearchCityAdapter;
 import cn.pku.edu.wwr.bean.City;
 import cn.pku.edu.wwr.App.MyApplication;
 import cn.pku.edu.wwr.db.CityDB;
 import cn.pku.edu.wwr.util.SharedPreferenceUtil;
+import javaLayout.BladeView;
+import javaLayout.BladeView.OnItemClickListener;
 
 //选择城市界面的---Weather08
 public class SelectCity extends Activity implements View.OnClickListener{
@@ -39,6 +42,10 @@ public class SelectCity extends Activity implements View.OnClickListener{
     private SharedPreferenceUtil mSpUtil;
     private MyApplication mApplication;
     private HashMap<String, City> cityCode_cityHashMap;
+
+    //private BladeView mLetter;//首字母？？
+    // 首字母对应的位置
+    //private Map<String, Integer> mIndexer;
 
     //使用TextWatcher监听EditText变化
     TextWatcher mTextWatcher = new TextWatcher() {
@@ -115,6 +122,7 @@ public class SelectCity extends Activity implements View.OnClickListener{
         mCityList = mApplication.getCityList();//获取城市列表
         mSpUtil = mApplication.getSharedPreferenceUtil();
         cityCode_cityHashMap = new HashMap<>();
+        //mIndexer = mApplication.getIndexer();///@
         for(City city : mCityList){
             cityCode_cityHashMap.put(city.getNumber(), city);
         }
@@ -236,6 +244,19 @@ public class SelectCity extends Activity implements View.OnClickListener{
         //titleName.setText("当前城市：北京");
         City curCity = cityCode_cityHashMap.get(mSpUtil.getCurCityCode());//根据当前城市编码得到城市名
         titleName.setText("当前城市：" + curCity.getCity());
+
+        //
+//        mLetter = (BladeView) findViewById(R.id.citys_bladeview);
+//        mLetter.setOnItemClickListener(new OnItemClickListener() {//点击右侧字母响应事件
+//            @Override
+//            public void onItemClick(String s) {
+////                if (mIndexer.get(s) != null) {
+////                    mCityListView.setSelection(mIndexer.get(s));//把第mIndexer.get(s)个item显示在ListView的最上方
+////                }
+//                Log.d("Letter","点击首字母");
+//            }
+//        });
+//        mLetter.setVisibility(View.GONE);
     }
 
     //更新顶部当前城市的文字

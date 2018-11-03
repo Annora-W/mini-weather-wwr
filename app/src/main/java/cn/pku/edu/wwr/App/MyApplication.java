@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import cn.pku.edu.wwr.bean.City;
 import cn.pku.edu.wwr.db.CityDB;
@@ -23,6 +24,8 @@ public class MyApplication extends Application{
     private CityDB mCityDB;
     private List<City> mCityList;//初始化城市信息列表//读取的每条数据库信息存在这里
     private SharedPreferenceUtil mSpUtil;
+    // 首字母对应的位置
+    //private Map<String, Integer> mIndexer;
 
     @Override
     public void onCreate(){
@@ -97,7 +100,7 @@ public class MyApplication extends Application{
         }).start();
     }
     private boolean prepareCityList(){
-        mCityList=mCityDB.getAllCity();//调用CityDB.java的方法
+        mCityList = mCityDB.getAllCity();//调用CityDB.java的方法
         int i=0;
         for(City city: mCityList){
             i++;
@@ -119,4 +122,9 @@ public class MyApplication extends Application{
         }
         return mSpUtil;
     }
+
+    //
+//    public Map<String, Integer> getIndexer() {
+//        return mIndexer;
+//    }
 }
