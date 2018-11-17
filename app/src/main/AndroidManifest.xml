@@ -26,7 +26,7 @@
         android:usesCleartextTraffic="true"
         >
 
-        <!--这一段表示对MainActivity这个活动进行注册，intent-filter里的两句表示这个活动是项目的主活动，在手机上打开APP后最先启动的就是这个活动-->
+        <!--这一段表示对MainActivity这个活动进行注册-->
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -36,9 +36,20 @@
 
         <!--对SelectCity这个活动进行注册,weather08-->
         <activity android:name=".SelectCity">
+        </activity>
+
+        <!--程序启动界面-->
+        <!--intent-filter里的两句表示这个活动是项目的主活动，在手机上打开APP后最先启动的就是这个活动-->
+        <activity android:name=".Guide">
 
         </activity>
 
+        <activity android:name=".Activity1">
+
+        </activity>
+        <activity android:name=".Activity2">
+
+        </activity>
     </application>
 
 </manifest>

@@ -8,8 +8,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
+import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -27,10 +29,14 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
+import cn.pku.edu.wwr.Adapter.ViewPagerAdapter;
 import cn.pku.edu.wwr.App.MyApplication;
 import cn.pku.edu.wwr.bean.City;
 import cn.pku.edu.wwr.bean.TodayWeather;
+import cn.pku.edu.wwr.bean.WeekWeather;
 import cn.pku.edu.wwr.db.CityDB;
 import cn.pku.edu.wwr.util.NetUtil;
 import cn.pku.edu.wwr.util.SharedPreferenceUtil;
@@ -38,7 +44,7 @@ import cn.pku.edu.wwr.util.SharedPreferenceUtil;
 
 /*implements View.OnClickListener添加按钮单击事件
 implements是一个类，实现一个接口用的关键字，它是用来实现接口中定义的抽象方法。*/
-public class MainActivity extends Activity implements View.OnClickListener{ //项目中所有活动必须继承Activity或它的子类才能拥有活动的特性
+public class MainActivity extends Activity implements View.OnClickListener, ViewPager.OnPageChangeListener{ //项目中所有活动必须继承Activity或它的子类才能拥有活动的特性
 
     //按钮
     private ImageView mUpdateBtn;//刷新按钮---weather05
@@ -47,10 +53,24 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
     //文字控件、图片控件
     private TextView cityTv, timeTv, humidityTv, weekTv, pmDataTv,
             pmQualityTv, temperatureTv, climateTv, windTv, city_name_Tv;// ---weather07
+    private TextView week1_dayTv, week1_temTv, week1_cliTv, week1_windTv,
+            week2_dayTv, week2_temTv, week2_cliTv, week2_windTv,
+            week3_dayTv, week3_temTv, week3_cliTv, week3_windTv,
+            week4_dayTv, week4_temTv, week4_cliTv, week4_windTv,
+            week5_dayTv, week5_temTv, week5_cliTv, week5_windTv,
+            week6_dayTv, week6_temTv, week6_cliTv, week6_windTv;
     private ImageView weatherImg, pmImg;// ---weather07
+    private ImageView week1Img, week2Image,week3Image,week4Image,week5Image,week6Image;
     private String mCurCityCode;//当前选择的城市编码
     private SharedPreferenceUtil mSpUtil;
     private MyApplication mApplication;
+    //显示七天天气用到的声明
+    private ViewPagerAdapter vpAdapter;//适配器，用于显示ViewPager的内容
+    private ViewPager vp;
+    private List<View> views;
+    private ImageView dots[];
+    private int[] ids = {R.id.week_weather_iv1, R.id.week_weather_iv2};//
+    private WeekWeather[] weekWeather;//一周天气
 
     //通过消息机制，将解析的天气对象发给主线程，主线程接收后调用updateTodayWeather来更新UI界面
    private static final int UPDATE_TODAY_WEATHER = 1;// ---weather07
@@ -96,16 +116,46 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
             Log.d("myWeather","网络挂了");
             Toast.makeText(MainActivity.this,"网络挂了！",Toast.LENGTH_LONG).show();
         }
+        initViewPager();
+        initDots();
+
         //初始化一些数据
         initData();
         //初始化控件内容
         initView(); //---weather07
+        //ViewPager相关的初始化
+
     }
 
     //初始化数据
     private void initData(){
         mApplication = MyApplication.getInstance();
         mSpUtil = mApplication.getSharedPreferenceUtil();
+        weekWeather = new WeekWeather[6];
+        for(int i=0;i<weekWeather.length;i++){
+            weekWeather[i] = new WeekWeather();
+        }
+        //weekWeather[0].setDate("今天");
+        //Log.d("myWeather", weekWeather[0].getDate());
+    }
+
+    //ViewPager相关的初始化
+    private void initViewPager(){
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        views = new ArrayList<View>();
+        views.add(layoutInflater.inflate(R.layout.week_weather_page1,null));
+        views.add(layoutInflater.inflate(R.layout.week_weather_page2,null));
+        vpAdapter = new ViewPagerAdapter(views,this);
+        vp = (ViewPager)findViewById(R.id.week_weather_viewpager);
+        vp.setAdapter(vpAdapter);
+        vp.setOnPageChangeListener(this);
+    }
+
+    private void initDots(){
+        dots = new ImageView[views.size()];
+        for (int i=0; i<views.size(); i++){
+            dots[i]=(ImageView)findViewById(ids[i]);
+        }
     }
 
     //为更新按钮添加单击事件 weather05
@@ -293,7 +343,7 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
                         //判断当前遇到的元素名称是否为resp（这个<resp>在xml文件里起始的地方）
                         if(xmlPullParser.getName().equals("resp"))
                         {
-                            todayWeather = new TodayWeather();//初始化TodayWeather对象
+                            todayWeather = new TodayWeather();
                         }
                         if(todayWeather != null)//已有初始化的TodayWeather对象，开始解析下面的数据
                         {
@@ -314,44 +364,230 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
                             {
                                 eventType = xmlPullParser.next();
                                 todayWeather.setShidu(xmlPullParser.getText());
-                            }else if(xmlPullParser.getName().equals("pm25"))//这个数据有时候没有！！！
+                            }else if(xmlPullParser.getName().equals("pm25"))
                             {
                                 eventType = xmlPullParser.next();
                                 todayWeather.setPm25(xmlPullParser.getText());
-                            }else if(xmlPullParser.getName().equals("quality"))//这个数据有时候没有！！！
+                            }else if(xmlPullParser.getName().equals("quality"))
                             {
                                 eventType = xmlPullParser.next();
                                 todayWeather.setQuality(xmlPullParser.getText());
-                            }else if(xmlPullParser.getName().equals("fengxiang") && fengxiangCount == 0)
+                            }else if(xmlPullParser.getName().equals("fengxiang"))
+                            {
+                                switch (fengxiangCount){
+                                    case 0:
+                                        eventType = xmlPullParser.next();
+                                        todayWeather.setFengxiang(xmlPullParser.getText());
+                                        weekWeather[1].setFengxiang(xmlPullParser.getText());
+                                        fengxiangCount++;
+                                        break;
+                                    case 1:
+                                        eventType = xmlPullParser.next();
+                                        weekWeather[2].setFengxiang(xmlPullParser.getText());
+                                        fengxiangCount++;
+                                        break;
+                                    case 2:
+                                        eventType = xmlPullParser.next();
+                                        weekWeather[3].setFengxiang(xmlPullParser.getText());
+                                        fengxiangCount++;
+                                        break;
+                                    case 3:
+                                        eventType = xmlPullParser.next();
+                                        weekWeather[4].setFengxiang(xmlPullParser.getText());
+                                        fengxiangCount++;
+                                        break;
+                                    case 4:
+                                        eventType = xmlPullParser.next();
+                                        weekWeather[5].setFengxiang(xmlPullParser.getText());
+                                        fengxiangCount++;
+                                        break;
+                                }
+                            }else if(xmlPullParser.getName().equals("fengli"))
+                            {
+                                switch (fengliCount){
+                                    case 0:
+                                        eventType = xmlPullParser.next();
+                                        todayWeather.setFengli(xmlPullParser.getText());
+                                        weekWeather[1].setFengli(xmlPullParser.getText());
+                                        fengliCount++;
+                                        break;
+                                    case 1:
+                                        eventType = xmlPullParser.next();
+                                        weekWeather[2].setFengli(xmlPullParser.getText());
+                                        fengliCount++;
+                                        break;
+                                    case 2:
+                                        eventType = xmlPullParser.next();
+                                        weekWeather[2].setFengli(xmlPullParser.getText());
+                                        fengliCount++;
+                                        break;
+                                    case 3:
+                                        eventType = xmlPullParser.next();
+                                        weekWeather[2].setFengli(xmlPullParser.getText());
+                                        fengliCount++;
+                                        break;
+                                    case 4:
+                                        eventType = xmlPullParser.next();
+                                        weekWeather[2].setFengli(xmlPullParser.getText());
+                                        fengliCount++;
+                                        break;
+                                }
+                            }else if(xmlPullParser.getName().equals("date"))
+                            {
+                                switch (dataCount){
+                                    case 0://今日日期
+                                        eventType = xmlPullParser.next();
+                                        todayWeather.setDate(xmlPullParser.getText());
+                                        weekWeather[1].setDate(xmlPullParser.getText());
+                                        dataCount++;//让dataCount不为零，也就是这些只处理一次
+                                        break;
+                                    case 1://第2天日期
+                                        eventType = xmlPullParser.next();
+                                        weekWeather[2].setDate(xmlPullParser.getText());
+                                        dataCount++;
+                                        break;
+                                    case 2://第3天日期
+                                        eventType = xmlPullParser.next();
+                                        weekWeather[3].setDate(xmlPullParser.getText());
+                                        dataCount++;
+                                        break;
+                                    case 3://第4天日期
+                                        eventType = xmlPullParser.next();
+                                        weekWeather[4].setDate(xmlPullParser.getText());
+                                        dataCount++;
+                                        break;
+                                    case 4://第5天日期
+                                        eventType = xmlPullParser.next();
+                                        weekWeather[5].setDate(xmlPullParser.getText());
+                                        dataCount++;
+                                        break;
+
+                                }
+                            }else if(xmlPullParser.getName().equals("high"))
+                            {
+                                switch (highCount){
+                                    case 0:
+                                        eventType = xmlPullParser.next();
+                                        todayWeather.setHigh(xmlPullParser.getText().substring(2).trim());//
+                                        weekWeather[1].setHigh(xmlPullParser.getText().substring(2).trim());
+                                        highCount++;
+                                        break;
+                                    case 1:
+                                        eventType = xmlPullParser.next();
+                                        weekWeather[2].setHigh(xmlPullParser.getText().substring(2).trim());
+                                        highCount++;
+                                        break;
+                                    case 2:
+                                        eventType = xmlPullParser.next();
+                                        weekWeather[3].setHigh(xmlPullParser.getText().substring(2).trim());
+                                        highCount++;
+                                        break;
+                                    case 3:
+                                        eventType = xmlPullParser.next();
+                                        weekWeather[4].setHigh(xmlPullParser.getText().substring(2).trim());
+                                        highCount++;
+                                        break;
+                                    case 4:
+                                        eventType = xmlPullParser.next();
+                                        weekWeather[5].setHigh(xmlPullParser.getText().substring(2).trim());
+                                        highCount++;
+                                        break;
+                                }
+                            }else if(xmlPullParser.getName().equals("low"))
+                            {
+                                switch (lowCount){
+                                    case 0:
+                                        eventType = xmlPullParser.next();
+                                        todayWeather.setLow(xmlPullParser.getText().substring(2).trim());//
+                                        weekWeather[1].setLow(xmlPullParser.getText().substring(2).trim());
+                                        lowCount++;
+                                        break;
+                                    case 1:
+                                        eventType = xmlPullParser.next();
+                                        weekWeather[2].setLow(xmlPullParser.getText().substring(2).trim());
+                                        lowCount++;
+                                        break;
+                                    case 2:
+                                        eventType = xmlPullParser.next();
+                                        weekWeather[3].setLow(xmlPullParser.getText().substring(2).trim());
+                                        lowCount++;
+                                        break;
+                                    case 3:
+                                        eventType = xmlPullParser.next();
+                                        weekWeather[4].setLow(xmlPullParser.getText().substring(2).trim());
+                                        lowCount++;
+                                        break;
+                                    case 4:
+                                        eventType = xmlPullParser.next();
+                                        weekWeather[5].setLow(xmlPullParser.getText().substring(2).trim());
+                                        lowCount++;
+                                        break;
+                                }
+                            }else if(xmlPullParser.getName().equals("type"))
+                            {
+                                switch (typeCount){
+                                    case 0:
+                                        eventType = xmlPullParser.next();
+                                        todayWeather.setType(xmlPullParser.getText());
+                                        weekWeather[1].setType(xmlPullParser.getText());
+                                        typeCount++;
+                                        break;
+                                    case 1:
+                                        eventType = xmlPullParser.next();
+                                        weekWeather[2].setType(xmlPullParser.getText());
+                                        typeCount++;
+                                        break;
+                                    case 2:
+                                        eventType = xmlPullParser.next();
+                                        weekWeather[3].setType(xmlPullParser.getText());
+                                        typeCount++;
+                                        break;
+                                    case 3:
+                                        eventType = xmlPullParser.next();
+                                        weekWeather[4].setType(xmlPullParser.getText());
+                                        typeCount++;
+                                        break;
+                                    case 4:
+                                        eventType = xmlPullParser.next();
+                                        weekWeather[5].setType(xmlPullParser.getText());
+                                        typeCount++;
+                                        break;
+                                }
+                            }//昨天日期
+                            else if(xmlPullParser.getName().equals("date_1")){
+                                eventType = xmlPullParser.next();
+                                Log.d("myWeather",xmlPullParser.getText());//
+                                weekWeather[0].setDate(xmlPullParser.getText());
+                            }
+                            //昨天高温
+                            else if(xmlPullParser.getName().equals("high_1"))
                             {
                                 eventType = xmlPullParser.next();
-                                todayWeather.setFengxiang(xmlPullParser.getText());
-                                fengxiangCount++;//
-                            }else if(xmlPullParser.getName().equals("fengli") && fengliCount == 0)
+                                weekWeather[0].setHigh(xmlPullParser.getText().substring(2).trim());
+                            }
+                            //昨天低温
+                            else if(xmlPullParser.getName().equals("low_1"))
                             {
                                 eventType = xmlPullParser.next();
-                                todayWeather.setFengli(xmlPullParser.getText());
-                                fengliCount++;//
-                            }else if(xmlPullParser.getName().equals("date") && dataCount == 0)
+                                weekWeather[0].setLow(xmlPullParser.getText().substring(2).trim());//
+                            }
+                            //昨天天气状况
+                            else if(xmlPullParser.getName().equals("type_1"))
                             {
                                 eventType = xmlPullParser.next();
-                                todayWeather.setDate(xmlPullParser.getText());
-                                dataCount++;//
-                            }else if(xmlPullParser.getName().equals("high") && highCount == 0)
+                                weekWeather[0].setType(xmlPullParser.getText());
+                            }
+                            //昨天风向
+                            else if(xmlPullParser.getName().equals("fx_1"))
                             {
                                 eventType = xmlPullParser.next();
-                                todayWeather.setHigh(xmlPullParser.getText().substring(2).trim());//
-                                highCount++;//
-                            }else if(xmlPullParser.getName().equals("low") && lowCount == 0)
+                                weekWeather[0].setFengxiang(xmlPullParser.getText());
+                            }
+                            //昨天风力
+                            else if(xmlPullParser.getName().equals("fl_1"))
                             {
                                 eventType = xmlPullParser.next();
-                                todayWeather.setLow(xmlPullParser.getText().substring(2).trim());//
-                                lowCount++;//
-                            }else if(xmlPullParser.getName().equals("type") && typeCount == 0)
-                            {
-                                eventType = xmlPullParser.next();
-                                todayWeather.setType(xmlPullParser.getText());
-                                typeCount++;//
+                                weekWeather[0].setFengli(xmlPullParser.getText());
                             }
                         }
                         break;
@@ -366,6 +602,10 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
             e.printStackTrace();
         }catch (IOException e){
             e.printStackTrace();
+        }
+        //Log.d("myWeather", weekWeather[0].getDate());
+        for (WeekWeather w : weekWeather){
+            Log.d("myWeather", w.getDate() + ", " + w.getType() +  ", " +w.getHigh()+ ", "+ w.getLow() + ", " +w.getFengli()+ ", " +w.getFengxiang());
         }
         return todayWeather;//
     }
@@ -387,6 +627,31 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
         pmImg = (ImageView) findViewById(R.id.pm2_5_image);//pm2.5图片
         weatherImg = (ImageView) findViewById(R.id.weather_img);//天气状况图片
 
+        week1_dayTv = (TextView)views.get(0).findViewById(R.id.week1_day);
+        week1_cliTv = (TextView)views.get(0).findViewById(R.id.week1_climate);
+        week1_temTv = (TextView)views.get(0).findViewById(R.id.week1_temperature);
+        week1_windTv = (TextView)views.get(0).findViewById(R.id.week1_wind);
+        week2_dayTv = (TextView)views.get(0).findViewById(R.id.week2_day);
+        week2_cliTv = (TextView)views.get(0).findViewById(R.id.week2_climate);
+        week2_temTv = (TextView)views.get(0).findViewById(R.id.week2_temperature);
+        week2_windTv = (TextView)views.get(0).findViewById(R.id.week2_wind);
+        week3_dayTv = (TextView)views.get(0).findViewById(R.id.week3_day);
+        week3_cliTv = (TextView)views.get(0).findViewById(R.id.week3_climate);
+        week3_temTv = (TextView)views.get(0).findViewById(R.id.week3_temperature);
+        week3_windTv = (TextView)views.get(0).findViewById(R.id.week3_wind);
+        week4_dayTv = (TextView)views.get(1).findViewById(R.id.week4_day);
+        week4_cliTv = (TextView)views.get(1).findViewById(R.id.week4_climate);
+        week4_temTv = (TextView)views.get(1).findViewById(R.id.week4_temperature);
+        week4_windTv = (TextView)views.get(1).findViewById(R.id.week4_wind);
+        week5_dayTv = (TextView)views.get(1).findViewById(R.id.week5_day);
+        week5_cliTv = (TextView)views.get(1).findViewById(R.id.week5_climate);
+        week5_temTv = (TextView)views.get(1).findViewById(R.id.week5_temperature);
+        week5_windTv = (TextView)views.get(1).findViewById(R.id.week5_wind);
+        week6_dayTv = (TextView)views.get(1).findViewById(R.id.week6_day);
+        week6_cliTv = (TextView)views.get(1).findViewById(R.id.week6_climate);
+        week6_temTv = (TextView)views.get(1).findViewById(R.id.week6_temperature);
+        week6_windTv = (TextView)views.get(1).findViewById(R.id.week6_wind);
+
         //把文字控件的值都设为N/A
         city_name_Tv.setText("N/A");
         cityTv.setText("N/A");
@@ -398,6 +663,31 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
         temperatureTv.setText("N/A");
         climateTv.setText("N/A");
         windTv.setText("N/A");
+
+        week1_dayTv.setText("N/A");
+        week1_cliTv.setText("N/A");
+        week1_temTv.setText("N/A");
+        week1_windTv.setText("N/A");
+        week2_dayTv.setText("N/A");
+        week2_cliTv.setText("N/A");
+        week2_temTv.setText("N/A");
+        week2_windTv.setText("N/A");
+        week3_dayTv.setText("N/A");
+        week3_cliTv.setText("N/A");
+        week3_temTv.setText("N/A");
+        week3_windTv.setText("N/A");
+        week4_dayTv.setText("N/A");
+        week4_cliTv.setText("N/A");
+        week4_temTv.setText("N/A");
+        week4_windTv.setText("N/A");
+        week5_dayTv.setText("N/A");
+        week5_cliTv.setText("N/A");
+        week5_temTv.setText("N/A");
+        week5_windTv.setText("N/A");
+        week6_dayTv.setText("N/A");
+        week6_cliTv.setText("N/A");
+        week6_temTv.setText("N/A");
+        week6_windTv.setText("N/A");
         //pmImg.setImageResource(R.drawable.biz_plugin_weather_201_300);
         //weatherImg.setImageResource(R.drawable.biz_plugin_weather_duoyun);
     }
@@ -508,6 +798,32 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
         temperatureTv.setText(todayWeather.getHigh() + "~" + todayWeather.getLow());//布局中间的，温度
         climateTv.setText(todayWeather.getType());//布局中间的，天气情况
         windTv.setText("风力：" + todayWeather.getFengli());//布局中间的，风力
+
+        week1_dayTv.setText(weekWeather[0].getDate());
+        week1_cliTv.setText(weekWeather[0].getType());
+        week1_temTv.setText(weekWeather[0].getHigh()+ "~" + weekWeather[0].getLow());
+        week1_windTv.setText(weekWeather[0].getFengxiang()+ weekWeather[0].getFengli());
+        week2_dayTv.setText(weekWeather[1].getDate());
+        week2_cliTv.setText(weekWeather[1].getType());
+        week2_temTv.setText(weekWeather[1].getHigh()+ "~" + weekWeather[1].getLow());
+        week2_windTv.setText(weekWeather[1].getFengxiang()+ weekWeather[1].getFengli());
+        week3_dayTv.setText(weekWeather[2].getDate());
+        week3_cliTv.setText(weekWeather[2].getType());
+        week3_temTv.setText(weekWeather[2].getHigh()+ "~" + weekWeather[2].getLow());
+        week3_windTv.setText(weekWeather[2].getFengxiang()+ weekWeather[2].getFengli());
+        week4_dayTv.setText(weekWeather[3].getDate());
+        week4_cliTv.setText(weekWeather[3].getType());
+        week4_temTv.setText(weekWeather[3].getHigh()+ "~" + weekWeather[3].getLow());
+        week4_windTv.setText(weekWeather[3].getFengxiang()+ weekWeather[3].getFengli());
+        week5_dayTv.setText(weekWeather[4].getDate());
+        week5_cliTv.setText(weekWeather[4].getType());
+        week5_temTv.setText(weekWeather[4].getHigh()+ "~" + weekWeather[4].getLow());
+        week5_windTv.setText(weekWeather[4].getFengxiang()+ weekWeather[4].getFengli());
+        week6_dayTv.setText(weekWeather[5].getDate());
+        week6_cliTv.setText(weekWeather[5].getType());
+        week6_temTv.setText(weekWeather[5].getHigh()+ "~" + weekWeather[5].getLow());
+        week6_windTv.setText(weekWeather[5].getFengxiang()+ weekWeather[5].getFengli());
+
     }
 
     //接收城市管理界面返回的数据 ---weather08-2
@@ -534,5 +850,26 @@ public class MainActivity extends Activity implements View.OnClickListener{ //�
                 }
             }
         }
+    }
+
+    @Override
+    public void onPageScrolled(int i, float v, int i1) {
+
+    }
+
+    @Override
+    public void onPageSelected(int i) {
+        for (int a=0;a<ids.length;a++){
+            if(a==i){
+                dots[a].setImageResource(R.drawable.page_indicator_focused);
+            }else {
+                dots[a].setImageResource(R.drawable.page_indicator_unfocused);
+            }
+        }
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int i) {
+
     }
 }

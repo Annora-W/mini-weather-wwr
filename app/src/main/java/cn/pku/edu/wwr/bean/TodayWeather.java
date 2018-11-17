@@ -7,6 +7,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.StringReader;
+import java.util.List;
 
 //---Weather07
 public class TodayWeather {
@@ -21,7 +22,7 @@ public class TodayWeather {
     private String date;//日期
     private String high;//高温
     private String low;//低温
-    private String type;
+    private String type;//天气状况图片
 
     public String getCity() {
         return city;
